@@ -75,10 +75,6 @@ end
 scatter(pos(:,1,1),pos(:,2,1),"filled")
 
 
-% mue_pos=zeros(L,2,Na,Nt); %NOTICE The change of structure
-% mue_vel=zeros(L,2,Na,Nt); %initialised belief states
-% mue_acc=zeros(L,2,Na,Nt);
-% mue_jer=zeros(L,2,Na,Nt);
 
 mue_dists         = zeros(L,Na,Nt);
 mue_dists_dot     = zeros(L,Na,Nt);
@@ -89,10 +85,7 @@ mue_dists_dot_dot_dot = zeros(L,Na,Nt);
 Fl=zeros(Na,Nt); %initialising free energies
 
 
-% hidden_pos=zeros(L,2,Na,Nt);
-% hidden_vel=zeros(L,2,Na,Nt); %initialised hidden environmental states
-% hidden_acc=zeros(L,2,Na,Nt);
-% hidden_jer=zeros(L,2,Na,Nt);
+
 
 hidden_dists             = zeros(L,Na,Nt);
 hidden_dists_dot         = zeros(L,Na,Nt); %initialised hidden environmental states
@@ -100,12 +93,6 @@ hidden_dists_dot_dot     = zeros(L,Na,Nt);
 hidden_dists_dot_dot_dot = zeros(L,Na,Nt);
 
 
-
-
-
-% sense_pos=zeros(L,2,Na,Nt);
-% sense_vel=zeros(L,2,Na,Nt); %initialised sensory states
-% sense_acc=zeros(L,2,Na,Nt);
 
 
 
