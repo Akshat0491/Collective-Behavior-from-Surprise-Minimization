@@ -1,0 +1,43 @@
+Read Chap6
+
+    ---
+    **Reference**
+
+    Parr, T., Pezzulo, G., & Friston, K. J. (2022). *Active Inference: The Free Energy Principle in Mind, Brain, and Behavior*. MIT Press.
+    ---
+
+
+
+Downloaded from http://direct.mit.edu/books/oa-monograph-pdf/2246566/book_9780262369978.pdf by guest on 10 June 2025
+
+
+
+6.4 What Is the Most Appropriate Form for the Generative Model?
+Once we have decided on the internal states of a system and the states that mediate their interaction with the world outside, we need to specify the generative model that explains how external states influence sensory states.
+
+As discussed in previous chapters, Active Inference can operate on different kinds of generative models. Therefore, we need to specify the most appropriate form of the generative model for the problem at hand. This implies making three main design choices:
+
+1. **Discrete or Continuous Variables (or Both)?**
+    - The first design choice is to consider whether generative models that use discrete or continuous variables are more appropriate. Discrete variables include object identities, alternative action plans, and discretized representations of continuous variables. These are modeled through expressing the probability—at each time step—of one variable transitioning into another type. Continuous variables include things like position, velocity, muscle length, and luminance and require a generative model expressed in terms of rates of change.
+    - Computationally, the distinction between the two may not be clear-cut because a continuous variable may be discretized, and a discrete variable may be expressed through continuous variables. However, this distinction is important conceptually, as it underlies specific hypotheses about the time course (discrete or continuous) of the cognitive processes of interest.
+    - In most current implementations of Active Inference, high-level decision processes, such as the choice between alternative courses of actions, are modeled using discrete variables, whereas more fine-grained perception and action dynamics are implemented using continuous variables.
+    - The choice between discrete and continuous variables is also relevant for neurobiology. While each style of modeling appeals to free energy minimization, the message passing they imply takes different forms. Continuous schemes underwrite predictive coding—a theory of neural processing that relies on top-down predictions corrected by bottom-up prediction errors. The analogous process theories for discrete inferences involve messages of a different form. The two types of model may be combined such that discrete states are associated with continuous variables, allowing for hybrid or mixed generative models.
+
+2. **Timescales of Inference: Shallow versus Hierarchical Models**
+    - The second design choice concerns the timescales of Active Inference. One can select either (shallow) generative models, in which all the variables evolve at the same timescale, or (hierarchical or deep) models, which include variables that evolve at different timescales: slower for higher levels and faster for lower levels.
+    - While many simple cognitive models only require shallow models, these are not sufficient when there is a clear separation of timescales between different aspects of a cognitive process of interest. For example, in language processing, short sequences of phonemes are contextualized by the word that is spoken, and short sequences of words are contextualized by the current sentence. To model language processing, one can consider a hierarchical model in which sentences, words, and phonemes appear at different hierarchical levels and evolve over timescales that are approximately independent of one another.
+    - This hierarchical factorization entails great computational benefits, as it allows summarizing the inferences performed at the timescale of interest without having to specify the details of lower-level (faster) inferential processes.
+    - Another example is intentional action selection, where the same goal (e.g., entering your apartment) can be active for an extended period and contextualizes a series of subgoals and actions (e.g., find keys, open door, enter) that are resolved at a much faster timescale. This separation of timescales demands a hierarchical (deep) generative model.
+
+3. **Temporal Depth of Inference and Planning**
+    - The third design choice concerns the temporal depth of inference. It is important to distinguish between generative models that have temporal depth and represent explicitly the consequences of actions or action sequences (policies or plans), and those that lack temporal depth and only consider present but not future observations.
+    - Temporally deep models endow agents with the ability to plan ahead and select among possible futures. For example, a rodent planning a route to a known food location in a maze benefits from a temporally deep model, which encodes contingencies between present and future locations conditioned on actions.
+    - In Active Inference, planning is realized by calculating the expected free energy associated with different actions or policies and then selecting the policy associated with the lowest expected free energy. Expected free energy is a functional of future observations, which can only be predicted using a temporally deep model.
+    - When designing an Active Inference agent, it is useful to consider whether it should have planning and future-oriented capacities, and, in this case, to select a temporally deep model. Planning depth—how far into the future the planning process can look—is also an important consideration.
+    - Generative models can be both hierarchical and temporally deep, allowing planning to proceed at multiple timescales—faster at lower levels, and slower at higher levels. The decision to model alternative futures, contingent on policy selection, is largely tied up with the choice between discrete and continuous models, as selecting between alternative futures is more simply articulated using discrete-time models.
+
+
+
+
+
+In more complex systems, more hierarchies!

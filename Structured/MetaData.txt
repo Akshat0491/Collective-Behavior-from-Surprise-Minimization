@@ -1,0 +1,62 @@
+$Context
+    Title                   =
+    System Description      =
+    Scale                   =
+    Who is the Agent        =
+    What is the Surrounding =
+    What is to be sensed    =
+    What is the action      =
+
+#system
+    internal_states         =
+    blanket_states          =
+        {expand if required}
+    external_states         =
+
+
+#Generative Model
+    Variables Type          =       (Categorical/Continuous/Hybrid)
+    Hierarchy Present       =       (Shallow/Hierarchical or Deep)
+    Temporal Depth Present  =       (POMDP or Coninuous-time model), associated with discrete/continuous, temporally deep model reqd for planning, can only happen with discrete case; needed for EFE
+                                    (Differrent levels can have different models)
+
+
+#Variables for genmodel   {most creative part, core!}
+    Fixed Variables         =
+    Can Learn               =
+    Remarks                 =
+
+
+
+$Gen Model is charecterised fully by the prior beliefs and likelihoods!
+
+
+
+
+
+
+
+
+
+
+
+
+
+title: "";
+system_description: "";
+agent_name:"";
+blanket_is_around:"";
+genmodel_type:"";
+internal_states: "";
+blanket_states: "";
+external_states: "";
+
+
+
+
+
+(more technically this is called meta data, more structured)
+
+
+
+

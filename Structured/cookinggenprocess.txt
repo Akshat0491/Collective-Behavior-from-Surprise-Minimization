@@ -1,0 +1,148 @@
+6.6 Setting Up the Generative Pro cess
+ In Active Inference, the generative process describes the dynamics of the world 
+external to the Active Inference agent, which corresponds to the pro cess 
+that determines the agent’s observations (see figure 6.1). It may seem bizarre 
+to have postponed defining the generative pro cess  until  after describing the 
+Downloaded from http://direct.mit.edu/books/oa-monograph-pdf/2246566/book_9780262369978.pdf by guest on 10 June 2025
+120 
+Chapter 6
+ agent’s generative model.  After all, a modeler would have some task (and 
+generative pro cess) in mind from the beginning, so it would make perfect 
+sense to revert this order and design the generative pro cess before the gen
+erative model, especially in applications where the generative model has to 
+be learned during situated interactions, as in gamelike or robotic settings 
+(Ueltzhöffer 2018, Millidge 2019, Sancaktar et al. 2020).
+ The reason we postponed the design of the generative pro cess is that, in 
+many practical applications discussed in this book, we simply assume that 
+the dynamics of the generative pro cess are the same as, or very similar to, 
+the generative model. In other words, we generally assume that the agent’s 
+generative model closely mimics the pro cess that generates its observations. 
+This is not the same as saying that the agent has perfect knowledge of the 
+environment. Indeed, even if the agent knows the pro cess that generates its 
+observations, it may be uncertain about (for example) its initial state in the 
+pro cess, as was the case in the apple versus frog example. In the language of 
+discrete- time Active Inference, one could design a model in which both the 
+generative model and the generative pro cess are characterized by the same 
+A- matrix but in which the agent’s belief about its initial state (D-vector), 
+which is part of its generative model, is dif fer ent from—or even inconsis
+tent with— the true initial state of the generative pro cess. One subtle  thing 
+to notice is that even if both the generative model and the generative pro
+cess are characterized by the same A- and B- matrices, their semantics are 
+different. The A- matrix of the generative pro cess is an objective property of 
+the environment (sometimes called a measurement distribution in Bayesian 
+models), whereas the A- matrix of the generative model encodes an agent’s 
+subjective belief (called a likelihood function in Bayesian models).
+ Of course, except in the simplest cases, it is not mandatory that the gen
+erative model and generative pro cess are the same. In practical implemen
+tations of Active Inference, one can always specify the generative pro cess 
+separately from the generative model,  either using equations that differ 
+from  those of the generative model or using other methods, such as game 
+simulators, which take actions as inputs and provide observations as out
+puts (Cullen et al. 2018), thereby following the usual action- perception 
+loop implied by the Markov blanket of figure 6.1.
+ There are some philosophical implications of designing generative mod
+els that are similar or dissimilar from the generative pro cess (Hohwy 2013; 
+Clark 2015; Pezzulo, Donnarumma et al. 2017; Nave et al. 2020, Tschantz 
+Downloaded from http://direct.mit.edu/books/oa-monograph-pdf/2246566/book_9780262369978.pdf by guest on 10 June 2025
+A  Recipe for Designing Active Inference Models 
+121
+ et al. 2020). As discussed above, the good regulator theorem (Conant and 
+Ashby 1970) says that an effective adaptive creature must have or be a good 
+model of the system it regulates. However, this can be achieved in vari ous 
+ways. First, as discussed so far, the creature’s generative model can mimic 
+(at least to a  great extent) the generative pro cess. Models developed in this 
+way may be called explicit or environmental models, given the resemblance 
+between their internal states and the environment’s external states. Second, 
+the creature’s generative model can be much more parsimonious than (and 
+even significantly dif fer ent from) the generative pro cess, to the extent that 
+it correctly manages  those aspects of the environment that are useful to act 
+adaptively in it and achieve the creature’s goals. Models developed in this 
+way may be called sensorimotor or action oriented, as they mostly encode 
+action- observation (or sensorimotor) contingencies and their primary role 
+is supporting goal- directed actions as opposed to providing an accurate 
+description of the environment.
+ The difference between explicit and action- oriented models can be 
+appreciated if we consider dif fer ent ways one can model (for example) a 
+rodent trying to escape from a maze in which some corridors are dead ends. 
+An explicit generative model may resemble a cognitive map of the maze 
+and provide a detailed characterization of external entities, such as spe
+cific locations, corridors, and dead ends. This model may permit the rodent 
+to escape from the maze using map- based navigation. An action- oriented 
+model may instead encode contingencies between whisker movements and 
+touch sensations. This latter model would afford the se lection of contextu
+ally appropriate strategies, such as moving forward (if no touch sensation 
+is experienced or expected) or changing direction (in the opposite case)— 
+eventually permitting the rodent to escape from the maze without explic
+itly representing locations, corridors, or dead ends.  These two kinds of 
+model prompt dif fer ent philosophical interpretations of Active Inference, 
+considering generative models as ways to  either reconstruct the external 
+environment (explicit) or afford accurate action control (action oriented).
+ Fi nally, as discussed in the field of morphological computation (Pfeifer and 
+Bongard 2006), some aspects of a creature’s or a robot’s control can be out
+sourced to the body and hence do not need to be encoded in its generative 
+model. One example is the passive dynamic walker: a physical object resem
+bling a  human body, composed of two “legs” and two “arms,” which is able 
+to walk an incline with no sensors, motors, or controllers (Collins et al. 
+Downloaded from http://direct.mit.edu/books/oa-monograph-pdf/2246566/book_9780262369978.pdf by guest on 10 June 2025
+122 
+Chapter 6
+ 2016). This example implies that at least some aspects of locomotion (or 
+other abilities) can be achieved with body mechanics that are carefully tuned 
+to exploit environmental contingencies (e.g., an appropriate body weight or 
+size to walk without slipping); therefore,  these contingencies do not need to 
+be encoded in the creature’s generative model. This suggests an alternative 
+way to design Active Inference agents (and their bodies) that are—as opposed 
+to have— good models of their environment. Yet all the ways to design Active 
+Inference models are not mutually alternative but can be appropriately com
+bined, depending on the prob lem of interest
+
+
+
+---
+title: Setting Up the Generative Process
+section: 6.6
+source: "A Recipe for Designing Active Inference Models"
+book: "Active Inference: The Free Energy Principle in Mind, Brain, and Behavior"
+authors: Thomas Parr, Giovanni Pezzulo, Karl J. Friston
+pages: 120-122
+---
+
+## Overview
+
+In Active Inference, the **generative process** describes the external world's dynamics, which determine the agent’s observations. Although it might seem logical to define the generative process before the agent’s generative model, the book often assumes both are similar or identical for practical reasons.
+
+## Key Points
+
+- **Generative Process vs. Generative Model**:  
+    - The generative process is the actual environment's dynamics.
+    - The generative model is the agent’s internal representation or belief about those dynamics.
+    - They often share the same structure (e.g., A- and B-matrices), but their semantics differ:  
+        - The process’s A-matrix is an objective measurement distribution.
+        - The model’s A-matrix is a subjective likelihood function.
+
+- **Uncertainty and Initial States**:  
+    - Even with identical models, agents may be uncertain about initial states, leading to differences in behavior.
+
+- **Explicit vs. Action-Oriented Models**:  
+    - **Explicit (Environmental) Models**:  
+        - Closely mimic the environment (e.g., a cognitive map).
+        - Useful for reconstructing external reality.
+    - **Action-Oriented (Sensorimotor) Models**:  
+        - Encode only contingencies relevant for action.
+        - Support goal-directed behavior without detailed environmental representation.
+
+- **Morphological Computation**:  
+    - Some control can be outsourced to body mechanics (e.g., passive dynamic walker).
+    - Not all adaptive behavior needs to be encoded in the generative model.
+
+- **Design Implications**:  
+    - Generative models can be explicit, action-oriented, or a combination, depending on the problem.
+
+## Summary
+
+This section discusses the relationship between the generative process and the generative model in Active Inference. While they are often similar in practical applications, their roles and semantics differ. The text distinguishes between explicit models (which reconstruct the environment) and action-oriented models (which support adaptive action), and highlights the role of body mechanics in offloading control. The choice of model structure depends on the agent’s goals and the problem context.
+
+---
+
+**Citation:**  
+Parr, T., Pezzulo, G., & Friston, K. J. (2022). *Active Inference: The Free Energy Principle in Mind, Brain, and Behavior*. MIT Press. Section 6.6, pp. 120-122.
