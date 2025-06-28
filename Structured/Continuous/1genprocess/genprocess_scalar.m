@@ -1,4 +1,4 @@
-function ret=genprocess(X,action,t,dt) %returns a cell array having world's states and the observations
+function ret=genprocess_scalar(X,action,t,dt) %returns a cell array having world's states and the observations
     % X : NxT matrix, where N is the number of agents and T is the number of time steps.
     % action : NxT matrix, where N is the number of agents and T is the number of time steps.
     % t : current time step.

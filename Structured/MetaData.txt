@@ -22,14 +22,17 @@ $Context
 
 
 #Variables for genmodel   {most creative part, core!}
-    Fixed Variables         =
-    Can Learn               =
+    #Variables
+        Fixed Variables     =
+        Can Learn           =       #in principle, everypart of genmodel can be learnt
     Remarks                 =
 
 
 
 $Gen Model is charecterised fully by the prior beliefs and likelihoods!
 
+
+#GenProcess
 
 
 
