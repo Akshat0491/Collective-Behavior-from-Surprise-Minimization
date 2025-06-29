@@ -14,6 +14,8 @@ Variables:
     
     stick to updating f(t+1)=f(t)+dt*f'(t)
 
+    Lambdas and Gammas
+
 
 Y_tilde is a cell containting o cells, each containing n cels, each containing LxT. Suppose o=3, L=5, T=3, N=6
 

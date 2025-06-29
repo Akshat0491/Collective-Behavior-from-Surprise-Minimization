@@ -27,3 +27,37 @@ x_tilde_temp(:,t+1)=x_tilde_temp(:,t)+ dt * F_tilde(o-i+1);
 
 
 Future avenue: seperate out f_tilde generation. currentl F_tilde generation is part of the genprocess_gnn function
+
+
+
+\frac{a}{b} 
+
+
+
+
+                                Flow of Functions
+      
+
+                              
+      ___________________          
+      | init_genprocess |          
+--------------------------------   
+|                             |    
+| init_R_tilde & init_F_tilde |   
+|                             |    
+-------------------------------   
+
+              |
+              |
+              |
+              |
+              |
+              Y
+      ___________________          
+      | update_genprocess |          
+--------------------------------   
+|                             |    
+| update_F_tilde  (action)    |
+| update_R_tilde  (F)         |
+|                             |    
+-------------------------------   
