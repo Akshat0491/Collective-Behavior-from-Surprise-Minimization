@@ -11,3 +11,6 @@ F=@(R_tilde,action) action; % function that governs the last term in the gnn app
 G=@(R_tilde,i,L,dL) sqrt((R_tilde(1:L,1:dL)-A(i,1:dL)*0).^2);  % maps Nxd-->LxdL 
 %i: ith agent,L: number of informations stored, like sensory sectors of heins et al 2024, dL: dimenstion of the world as agent sees it. For example, agent might be seeing only distances, making the world 1D for it, though the world maybe dD.
 
+
+g=@(mu_tilde_x,mu_tilde_v) mu_tilde_x;
+f=@(mu_tilde_x,v_tilde) 1;
