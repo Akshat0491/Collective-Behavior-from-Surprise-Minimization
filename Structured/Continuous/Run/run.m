@@ -4,6 +4,9 @@ T=100;
 dimworld=2; %aka d % dimension of the variable that charecterises the world state.
 dt=0.1; % time step
 R_tilde=init_R_tilde(o,N,T);
+L=4; 
+dL = 1; %Do not change this for now, might give weird stuff for dL>1, for such a case, use multiple genmodels insetad.
+
 
 F=@(R_tilde,action) action; % function that governs the last term in the gnn approximation. 
 

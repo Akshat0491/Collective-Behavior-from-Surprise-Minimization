@@ -1,37 +1,95 @@
 % function ret=test_genprocess
 %testing a spring maxx system
-
+close all;
+clear all;
 %parameters
 o=3; %truncate upto acceleration
-N=2; %Number of agents
+N=5; %Number of agents
 d=2; %One dimensional world 
-T=200;
+L=3; %number of distinct infos agent holds
+dL=1; %dimensions of the dintinct info, never change is for now, doesn't work for dl>1
+T=100;
+gamma_vecdL_y=ones(1,dL);
+gamma_vecdL_x=ones(1,dL); %can have it differrent
+gamma_vecdL_v=ones(1,dL);
+
+lambda_vecdL_y=ones(1,dL);
+lambda_vecdL_x=ones(1,dL);
+lambda_vecdL_v=ones(1,dL);
 dt=0.1;
 
 
 % F=@(A,B) B;
 F = @(R_tilde, action) action;  % F = -x(t), i.e. Hookean force
 % G = something
+f_1
+f_2
+f_3
+f=[]; %ox1 array containing functions handles. each function handles maps ((LxdL)x(LxdL))-->LxdL; %doubt here, would this be ((LxdL)x(LxdL))-->Nxd
+
+g_1
+g_2
+g_3
+g=[]; %ox1 array containing functions handles. each function handles maps ((LxdL)x(LxdL))-->LxdL;
+
+f_int_tilde=init_f_int_tilde(f);
+g_int_tilde=init_g_int_tilde(g);
+
+
+
 
 
 %initialising
 time=0:dt:T;
-genprocess=init_genprocess(o,N,d,T); %returns a dictionary containing R_tilde and F_tilde like "R_tilde"-->{R_tilde}
-R_tilde=get_from_dict(genprocess,"R_tilde"); %get the R_tilde from the dictionary
 
+
+%each of following objects returns a dictionary containing object by their literal names like "R_tilde"-->{R_tilde}
+sense       =init_sense(N,o,L,dL,T,gamma_vecdL_y,lambda_vecdL_y);  
+genmodel    =init_genmodel(N,o,L,dL,T,gamma_vecdL_x,lambda_vecdL_x,gamma_vecdL_v,lambda_vecdL_v);
+action      =init_action(N,d,T);
+genprocess  =init_genprocess(o,N,d,T); 
+
+
+%Change initial configuration. Alternatively change the function init_R_tilde
+
+R_tilde=get_from_dict(genprocess,"R_tilde"); %get the R_tilde from the dictionary
+S=10;
 R_tilde{1}(:,:,:)=5*ones(N,d,T); 
 R_tilde{2}(:,:,:)=zeros(N,d,T);    %manually change initial configurations  ||
 R_tilde{3}(:,:,:)=zeros(N,d,T);                                      %      ||
 
 
 F_tilde=get_from_dict(genprocess,"F_tilde"); %get the F_tilde from the dictionary
-action=init_action(N,d,T);
 
 %simulation loop
 for t=2:T
+
+    
+    %each of following objects returns a dictionary containing object by their literal names like "R_tilde"-->{R_tilde}
+    sense       =update_sense(get_from_dict(sense,"Y_ext_tilde"),G,get_from_dict(genprocess,"R_tilde"),noise_params,t);  
+    genmodel    =update_genmodel();
+    action      =update_action();
+    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),action,dt,t); 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     R_tilde=get_from_dict(genprocess,"R_tilde");
-    % action(:,:,t)= - R_tilde{1}(:,:,t-1) - 0.5*R_tilde{2}(:,:,t-1) ; To be replaced with update_action
+    action(:,:,t)= - R_tilde{1}(:,:,t-1) ; %To be replaced with genmodel("action")/updateaction
     genprocess=update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),action,dt,t);
+    Y_ext_tilde
 end
 
 figure(1);
@@ -68,8 +126,10 @@ outputVideo.FrameRate = 15; % Adjust as needed
 % outputVideo.FileFormat='mp4';
 open(outputVideo);
 
-fig = figure('Color','k'); % black background for visual clarity
-
+fig = figure('Color','w'); % black background for visual clarity
+ylabel("Y");
+xlim([-S S]);
+ylim([-S S]);
 for t = 1:T-10
 clf
 scatter(squeeze(R_tilde{1}(1,1,t)), squeeze(R_tilde{1}(1,2,t)), 10, 'w', 'filled'); % white dots
@@ -78,9 +138,7 @@ scatter(squeeze(R_tilde{1}(1,1,t)), squeeze(R_tilde{1}(1,2,t)), 10, 'w', 'filled
 %     mean(sense_dists(:,:,t), 'all'), ...
 %     mean(mue_dists(:,:,t), 'all')));
 
-ylabel("Y");
-xlim([-S S]);
-ylim([-S S]);
+
 
 % if have_noise
 % title(sprintf('Time %.2f sec,N:%.f,\n dt:%.2f, k:%.2f, R:%.2f, vision:full,\n alpha:%f, eta:%.2f, Lambda_w:%.2f,Lambda_z:%.2f, Gamma_w:%.2f, Gamma_z: %.2f', (t-1)*dt,Na,dt,k,R,alpha1,eta,Lambda_w,Lambda_z,Gamma_w,Gamma_z), 'Color', 'w');
