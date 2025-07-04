@@ -1,4 +1,4 @@
-function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,PI_tilde_y,Y_ext_tilde,g_int_tilde,PI_tilde_x,jacobian_f_int_tilde_x,f_int_tilde,eta_tilde,PI_tilde_v,t,dt,kx)
+function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,PI_tilde_y,Y_ext_tilde,g_int_tilde,PI_tilde_x,jacobian_f_int_tilde_x,f_int_tilde,eta_tilde,PI_tilde_v,t,dt,kx,n_kx)
     % flag: string indicating whether it's for x or v
     N=length(mu_tilde_x);
     L=size(mu_tilde_x{1}{1},1);

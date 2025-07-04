@@ -12,9 +12,10 @@ N=4; %Number of agents
 d=2; %One dimensional world 
 L=N; %number of distinct infos agent holds
 dL=1; %dimensions of the dintinct info, never change is for now, doesn't work for dl>1
-T=200;
+T=100;
 
 %learning parameters
+n_kx =5;
 kx  =0.1;
 kpx =0.01;
 kv  =0.01; %learnign rates. 
@@ -112,18 +113,22 @@ for t=2:T
 
     
     %each of following objects returns a dictionary containing object by their literal names like "R_tilde"-->{R_tilde}
+    action      =update_action(genprocess{"R_tilde"},action,t);
+
+    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),action,dt,t);
+    
     sense       =update_sense(sense{"Y_ext_tilde"},G,...
                               genprocess{"R_tilde"},noise_params,sense{"PI_tilde_y"},...
                               t);  
     
-    genmodel    =update_genmodel(genmodel{"vfe"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},jacobian_g_int_tilde_x,sense{"PI_tilde_y"},sense{"Y_ext_tilde"},g_int_tilde,genmodel{"PI_tilde_x"},jacobian_f_int_tilde_x,f_int_tilde,1,genmodel{"PI_tilde_v"},t,dt,kx);
+    genmodel    =update_genmodel(genmodel{"vfe"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},jacobian_g_int_tilde_x,sense{"PI_tilde_y"},sense{"Y_ext_tilde"},g_int_tilde,genmodel{"PI_tilde_x"},jacobian_f_int_tilde_x,f_int_tilde,1,genmodel{"PI_tilde_v"},t,dt,kx,n_kx);
     
 
     
    
-    action      =update_action(genprocess{"R_tilde"},action,t);
     
-    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),action,dt,t); 
+    
+     
 
 
 
@@ -154,6 +159,8 @@ R_tilde=genprocess{"R_tilde"};
 vfe=genmodel{"vfe"};
 mu=genmodel{"mu_tilde_x"};
 Y=sense{"Y_ext_tilde"};
+
+
 figure(1);
 scatter(1:T,squeeze(mu{2}{1}(1,1,:)))
 hold on;
@@ -191,7 +198,7 @@ outputVideo.FrameRate = 15; % Adjust as needed
 open(outputVideo);
 
 fig = figure('Color','w'); % black background for visual clarity
-S=max(R_tilde{1});
+S=max(R_tilde{1}(1,1,:));
 for t = 1:T-10
 clf
 

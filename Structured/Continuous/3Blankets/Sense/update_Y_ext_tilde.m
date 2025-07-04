@@ -13,8 +13,9 @@ function ret=update_Y_ext_tilde(Y_tilde,G,R_tilde,noise_params,t)
 
     for k=1:o
         temp=R_tilde{k}(:,:,t);
-        parfor i=1:N
-            Y_tilde{i}{k}(:,:,t)=feval(G,temp,i);
+        % parfor i=1:N
+        for i=1:N
+            Y_tilde{i}{k}(:,:,t)=G(temp,i);
         end
     end
 
