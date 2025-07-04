@@ -13,7 +13,6 @@ function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,PI
     
     parfor i=1:N
     % for i=1:N
-        i,t
         gx=cell2mat(update_g_int_tilde(g_int_tilde,curr_mu_tilde_x{i},curr_mu_tilde_v{i}));
         fx=cell2mat(update_f_int_tilde(f_int_tilde,curr_mu_tilde_x{i},curr_mu_tilde_v{i}));
 

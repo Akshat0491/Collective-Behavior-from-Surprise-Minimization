@@ -1,6 +1,6 @@
 % function ret=test_genprocess
 %testing a spring maxx system
-close all;
+% close all;
 clear all;
 
 %---------------------------------------------------------------------------------------------------------------------------------------
@@ -8,22 +8,24 @@ clear all;
 % ---------------------------------------------------------------------------------------------------------------------------------------
 dt=0.1;
 o=3; %truncate upto acceleration
-N=4; %Number of agents
+n=2;
+N=n^2; %Number of agents
 d=2; %One dimensional world 
 L=N; %number of distinct infos agent holds
 dL=1; %dimensions of the dintinct info, never change is for now, doesn't work for dl>1
 T=100;
+wanna_save=0;
 
 %learning parameters
 n_kx =5;
-kx  =0.1;
+kx  =0.15;
 kpx =0.01;
 kv  =0.01; %learnign rates. 
 kpv =0.01;
 ka  =0.01;
 
 gamma_vecdL_y=ones(1,dL);
-gamma_vecdL_x=ones(1,dL); %can have it differrent
+gamma_vecdL_x=1*ones(1,dL); %can have it differrent
 gamma_vecdL_v=ones(1,dL);
 
 lambda_vecdL_y=ones(1,dL);
@@ -93,10 +95,18 @@ genprocess  =init_genprocess(o,N,d,T);
 %% Change initial configuration. Alternatively change the function init_R_tilde
 
 R_tilde=get_from_dict(genprocess,"R_tilde"); %get the R_tilde from the dictionary
-S=50;
 
+
+
+% for i=1:Na
+    
+% end
+
+
+di=1/(n-1);
 for i=1:N
-    R_tilde{1}(i,:,:)=(2*mod(i,2)-1+i) * ones(1,d,T); 
+    % R_tilde{1}(i,:,:)=(2*mod(i,2)-1+i) * ones(1,d,T); 
+    R_tilde{1}(i,:,1)=[-1/2 +  (mod(i-1,n))*di,-1/2 + (floor((i-1)/n))*di]; 
     R_tilde{2}(i,:,:)=zeros(1,d,T);    %manually change initial configurations  ||
     R_tilde{3}(i,:,:)=zeros(1,d,T);    %      ||
 end
@@ -110,38 +120,23 @@ F_tilde=get_from_dict(genprocess,"F_tilde"); %get the F_tilde from the dictionar
 
 
 for t=2:T
-
+    t
     
     %each of following objects returns a dictionary containing object by their literal names like "R_tilde"-->{R_tilde}
     action      =update_action(genprocess{"R_tilde"},action,t);
 
-    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),action,dt,t);
+    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),...
+                                                action,dt,t);
     
     sense       =update_sense(sense{"Y_ext_tilde"},G,...
                               genprocess{"R_tilde"},noise_params,sense{"PI_tilde_y"},...
                               t);  
     
-    genmodel    =update_genmodel(genmodel{"vfe"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},jacobian_g_int_tilde_x,sense{"PI_tilde_y"},sense{"Y_ext_tilde"},g_int_tilde,genmodel{"PI_tilde_x"},jacobian_f_int_tilde_x,f_int_tilde,1,genmodel{"PI_tilde_v"},t,dt,kx,n_kx);
+    genmodel    =update_genmodel(genmodel{"vfe"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},...
+                                jacobian_g_int_tilde_x,sense{"PI_tilde_y"},sense{"Y_ext_tilde"},...
+                                g_int_tilde,genmodel{"PI_tilde_x"},jacobian_f_int_tilde_x,f_int_tilde,...
+                                1,genmodel{"PI_tilde_v"},t,dt,kx,n_kx);
     
-
-    
-   
-    
-    
-     
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -160,37 +155,75 @@ vfe=genmodel{"vfe"};
 mu=genmodel{"mu_tilde_x"};
 Y=sense{"Y_ext_tilde"};
 
+fig = figure('Color', 'w');
+% Split the long title into multiple lines for better visibility
+mainTitle = sprintf('dt=%.2f, o=%d, n=%d, N=%d, d=%d, L=%d, dL=%d, T=%d', dt, o, n, N, d, L, dL, T);
+paramTitle = sprintf('n_kx=%d, kx=%.2f, kpx=%.2f, kv=%.2f, kpv=%.2f, ka=%.2f', n_kx, kx, kpx, kv, kpv, ka);
+tl = tiledlayout(4,1, 'Padding', 'compact', 'TileSpacing', 'compact');
+sg = sgtitle(tl, {mainTitle; paramTitle}, 'FontWeight', 'bold', 'FontSize', 12);
+tl.TileSpacing = 'compact';
+tl.Padding = 'compact';
+% tl.TitleTop = 10; % Increase space above the title for visibility
 
-figure(1);
-scatter(1:T,squeeze(mu{2}{1}(1,1,:)))
-hold on;
-scatter(1:T,squeeze(Y{2}{1}(1,1,:)))
-title("mu vs sense")
-xlabel("X")
-ylabel("X_{dot}")
+% 1st subplot: Prediction error
+nexttile;
+plot(1:T, squeeze(abs(mu{1}{1}(2,1,:) - Y{1}{1}(2,1,:))), 'LineWidth', 1.5, 'Color', [0.85 0.33 0.1]); hold on;
+plot(1:T, squeeze(abs(mu{2}{1}(1,1,:) - Y{2}{1}(1,1,:))), 'LineWidth', 1.5, 'Color', [0.12 0.45 0.70]);
+hold off;
+title(sprintf('|Prediction error Vs Time.| \n Agent i sees the agent j'), 'Color', [0.85 0.33 0.1]);
+xlabel("t");
+ylabel('|g(\mu) - y|');
+legend('Agent 1', 'Agent 2');
+grid on;
 
+% 2nd subplot: VFE
+nexttile;
+plot(1:T, vfe(1,:), 'LineWidth', 1.5, 'Color', [0.13 0.55 0.13]); hold on;
+plot(1:T, vfe(2,:), 'LineWidth', 1.5, 'Color', [0.85 0.33 0.1]);
+hold off;
+title("VFE of agent 1 (green) and agent 2 (red)", 'Color', [0.13 0.55 0.13]);
+xlabel("t");
+ylabel("VFE");
+legend('Agent 1', 'Agent 2');
+grid on;
 
-figure(2);
-scatter(1:T,vfe(1,:))
-title("Vfe of 1st agent")
-xlabel("t")
-ylabel("y")
+% 3rd subplot: Action profile
+nexttile;
+scatter(1:T, squeeze(action(1,1,:)), 20, [0.12 0.45 0.70], 'filled', 'MarkerEdgeColor', [0.12 0.45 0.70], 'MarkerFaceAlpha', 0.7); hold on;
+scatter(1:T, squeeze(action(2,1,:)), 20, [0.85 0.33 0.1], 'filled', 'MarkerEdgeColor', [0.85 0.33 0.1], 'MarkerFaceAlpha', 0.7);
+hold off;
+title("Action profile of agent 1 (blue) and 2 (red), x coordinate", 'Color', [0.12 0.45 0.70]);
+xlabel("time");
+ylabel("Action");
+legend('Agent 1', 'Agent 2');
+grid on;
 
+% 4th subplot: X coordinates of agent 1 and 2
+nexttile;
+plot(1:T, squeeze(R_tilde{1}(1,1,:)), 'LineWidth', 1.5, 'Color', [0.2 0.2 0.8]); hold on;
+plot(1:T, squeeze(R_tilde{1}(2,1,:)), 'LineWidth', 1.5, 'Color', [0.8 0.2 0.2]);
+hold off;
+title('X coordinate of agent 1 (blue) and 2 (red)', 'Color', [0.2 0.2 0.8]);
+xlabel('time');
+ylabel('X position');
+legend('Agent 1', 'Agent 2');
+grid on;
 
 
 % S=10;
 
 
-
-output_dir ="D:\Projects\Summer 2025\Surprise Minimisation\outputs"; % replace with your desired path
+if wanna_save
+output_dir ="D:\Projects\Summer 2025\Surprise Minimisation\outputs\structured_testing"; % replace with your desired path
 
 now_dt = datetime('now');
 now_dt.TimeZone = 'local';
 now=string(now_dt, 'd-MMM-y HH:mm:ss');
 now=split(now,":");
 now=join(now,"_");
-filename = fullfile(output_dir, sprintf('SHM_%s', ...
+filename = fullfile(output_dir, sprintf('Test_%s', ...
 now));
+
 
 outputVideo = VideoWriter(filename,'MPEG-4');
 outputVideo.FrameRate = 15; % Adjust as needed
@@ -198,7 +231,8 @@ outputVideo.FrameRate = 15; % Adjust as needed
 open(outputVideo);
 
 fig = figure('Color','w'); % black background for visual clarity
-S=max(R_tilde{1}(1,1,:));
+% S=max(squeeze(R_tilde{1}(1,1,:)));
+S=1;
 for t = 1:T-10
 clf
 
@@ -224,9 +258,10 @@ drawnow;
 
 % Capture the plot as a frame
 frame = getframe(fig);
-writeVideo(outputVideo, frame);
+% writeVideo(outputVideo, frame);
 end    
     close(outputVideo);
+end
 
 
 
@@ -265,21 +300,6 @@ ret=R_tilde;
 %---------------------------------------------------------------------------------------------------------------------------------------
 %% Helper Functions
 %---------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
