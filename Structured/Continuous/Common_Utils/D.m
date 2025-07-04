@@ -15,11 +15,8 @@ function ret=D(A) %derivatibe of A/shiftup!
         o=length(A);
         for i=1:o
             if i==o
-                tempo=cell(length(A{1}),1);
-                temptemp=temp{1};
-                parfor l=1:length(A{1})
-                    tempo{l}=zeros(size(temptemp));
-                end
+                tempo=zeros(size(A{1}));
+
                 temp{o}=tempo;
             else
                 temp{i}=temp{i+1};

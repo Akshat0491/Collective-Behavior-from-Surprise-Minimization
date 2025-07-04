@@ -541,7 +541,7 @@ sigma_s=[1,0,-0.5/(lambda^2);
          0,0.5/(lambda^2), 0;
          -0.5/(lambda^2),0,0.75/(lambda^4)];
 sigma_t=diag(Gamma_vec);
-Sigma=kron(sigma_t,sigma_s);
+Sigma=kron(sigma_s,sigma_t); %??????
 end
 
 
