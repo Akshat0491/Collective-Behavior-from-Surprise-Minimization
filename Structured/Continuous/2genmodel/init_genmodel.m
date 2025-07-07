@@ -14,8 +14,8 @@ function ret=init_genmodel(N,o,L,dL,T,gamma_vecdL_x,lambda_vecdL_x,gamma_vecdL_v
     vfe         =init_vfe(N,T);
    
 
-    vars = ["mu_tilde_x", "PI_tilde_x", "mu_tilde_v", "PI_tilde_v", "vfe"];
-    vals = [{mu_tilde_x}, {PI_tilde_x}, {mu_tilde_v}, {PI_tilde_v}, {vfe}];
+    vars = ["mu_tilde_x", "PI_tilde_x", "mu_tilde_v", "PI_tilde_v","vfe"];
+    vals = [{mu_tilde_x}, {PI_tilde_x}, {mu_tilde_v}, {PI_tilde_v},{vfe}];
     ret=dictionary(vars,vals);
 end
 

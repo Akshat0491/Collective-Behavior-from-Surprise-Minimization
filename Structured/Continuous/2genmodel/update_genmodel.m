@@ -1,4 +1,7 @@
-function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,PI_tilde_y,Y_ext_tilde,g_int_tilde,PI_tilde_x,jacobian_f_int_tilde_x,f_int_tilde,eta_tilde,PI_tilde_v,t,dt,kx,n_kx)
+function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,...
+                            PI_tilde_y,Y_ext_tilde,jacobian_G_ext_tilde_x,...
+                            g_int_tilde,PI_tilde_x,jacobian_f_int_tilde_x,f_int_tilde,...
+                            eta_tilde,PI_tilde_v,t,dt,kx,n_kx)
     % flag: string indicating whether it's for x or v
     N=length(mu_tilde_x);
     L=size(mu_tilde_x{1}{1},1);
@@ -12,9 +15,10 @@ function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,PI
     % D_curr_mu_tilde_v =D(get_curr_mu(mu_tilde_v,t-1));
     
     parfor i=1:N
-    % for i=1:N
+    %  for i=1:N
         gx=cell2mat(update_g_int_tilde(g_int_tilde,curr_mu_tilde_x{i},curr_mu_tilde_v{i}));
         fx=cell2mat(update_f_int_tilde(f_int_tilde,curr_mu_tilde_x{i},curr_mu_tilde_v{i}));
+        
 
         e_tilde_y=mat2cell(cell2mat(curr_Y_ext_tilde{i})-gx,L*ones(1,o),ones(1,dL));        
         e_tilde_x=mat2cell(cell2mat(D(curr_mu_tilde_x{i}))-fx,L*ones(1,o),ones(1,dL));
@@ -27,6 +31,9 @@ function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,PI
         grad_term_x_1=jacobi_dot_PI_b(jacobi_gx,PI_tilde_y,e_tilde_y); 
         grad_term_x_2=D_dot_PI_e(PI_tilde_x,e_tilde_x,o); %Keep in mind that this term should be subtracted
         grad_term_x_3=jacobi_dot_PI_b(jacobi_fx,PI_tilde_x,e_tilde_x);
+
+
+    
 
         % grad_term_v_1=jacobi_dot_PI_b(jacobi_gx,PI_tilde_y,e_tilde_y) 
         % grad_term_v_2=D_dot_PI_e(PI_tilde_x,e_tilde_x,o) %Keep in mind that this term should be subtracted
