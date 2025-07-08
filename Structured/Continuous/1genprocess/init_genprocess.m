@@ -2,10 +2,10 @@ function ret=init_genprocess(o,N,d,T)
 
     %rn no noise in genprocess
 
-    R_tilde=init_R_tilde(o,N,d,T);
-    F_tilde=init_F_tilde(R_tilde);
-    vars=["R_tilde", "F_tilde"];
-    vals=[{R_tilde},{F_tilde}];
+    RR_tilde=init_RR_tilde(o,N,d,T);
+    F_tilde=init_F_tilde(RR_tilde);
+    vars=["RR_tilde", "F_tilde"];
+    vals=[{RR_tilde},{F_tilde}];
 
 
 
@@ -14,7 +14,7 @@ end
 
 %use as
 % genprocess=init_genprocess(o,N,d,T);
-% R_tilde=genprocess("R_tilde"){1};
+% RR_tilde=genprocess("RR_tilde"){1};
 
 
 

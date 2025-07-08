@@ -1,7 +1,7 @@
 % function ret=test_genprocess
 %testing a spring maxx system
-close all;
-clear all;
+% close all;
+% clear all;
 
 %---------------------------------------------------------------------------------------------------------------------------------------
 %% parameters
@@ -9,7 +9,7 @@ clear all;
 dt=0.1;
 o=3; %truncate upto acceleration, by default let it be 3, there might be some problems with non 3 values.
 n=2;
-N=n^2; %Number of agents
+N=2; %Number of agents
 d=2; %One dimensional world 
 L=N; %number of distinct infos agent holds
 dL=1; %dimensions of the dintinct info, never change is for now, doesn't work for dl>1
@@ -17,16 +17,16 @@ T=100;
 % Rescale agent diameter to fit nicely in a 2x2 square
 S = 1; % Side length of the square (from -S to S)
 dia = 1 * (2*S) * 72; % 10% of the square's width, scaled for scatter marker size
-wanna_save=1;
+wanna_save=0;
 S=10;
 
 %learning parameters
 n_kx =5;
-kx  =0.01;
-kpx =0.01;
-kv  =0.01; %learnign rates. 
-kpv =0.01;
-ka  =0.001;
+kx0  =0.05;
+kpx =0.01*0;
+kv0  =0.01; %learnign rates. 
+kpv =0.01*0;
+ka0  =0.01*1;
 
 gamma_vecdL_y=ones(1,dL);
 gamma_vecdL_x=1*ones(1,dL); %can have it differrent
@@ -36,16 +36,20 @@ lambda_vecdL_y=ones(1,dL);
 lambda_vecdL_x=ones(1,dL);
 lambda_vecdL_v=ones(1,dL);
 noise_params=1;
+etas=[0,10,0]; %ox1 vector
 
 
 
 % F=@(A,B) B;
-F = @(R_tilde, action) action;  % F = -x(t), i.e. Hookean force
+F = @(RR_tilde, action) action;  % F = -x(t), i.e. Hookean force
 G = @(A,i) sqrt(sum((A - A(i,:)).^2, 2)); %returns euclidean distance 
 
-G_ext_tilde={@(x,xi,y,yi) sqrt(eps + (x-xi).^2 + (y-yi).^2); 
-             @(x_dot,xi_dot,y_dot,yi_dot) sqrt(eps + (x_dot-xi_dot).^2 + (y_dot-yi_dot).^2); 
-             @(x_dot_dot,xi_dot_dot,y_dot_dot,yi_dot_dot) sqrt(eps + (x_dot_dot-xi_dot_dot).^2 + (y_dot_dot-yi_dot_dot).^2)};
+
+
+
+G_ext_tilde={@(x,xi,y,yi,x_dot,xi_dot,y_dot,yi_dot) sqrt(eps + (x-xi).^2 + (y-yi).^2); 
+             @(x,xi,y,yi,x_dot,xi_dot,y_dot,yi_dot) ((x-xi)*(x_dot-xi_dot)+(y-yi)*(y_dot-yi_dot)) ./ sqrt((x_dot-xi_dot).^2 + (y_dot-yi_dot).^2)
+             @(x,xi,y,yi,x_dot,xi_dot,y_dot,yi_dot) 0};
 
 
 %will need to change it as per the value of o
@@ -68,9 +72,9 @@ f_int_tilde = {@(x,v)                  x+v;...            %for now, no coupling 
                @(x_dot,v_dot)          x_dot+v_dot;...                 %this kind of structure is important, atleasft for the way gradient descent is implemented
                @(x_dot_dot,v_dot_dot)  x_dot_dot+v_dot_dot};            % for now, working only with f^[i] is a function only of ith derivatives of x and v.
 
-g_int_tilde = {@(x,v)                  x;
-               @(x_dot,v_dot)          x_dot;                 %this kind of structure is important, atleasft for the way gradient descent is implemented
-               @(x_dot_dot,v_dot_dot)  x_dot_dot};
+g_int_tilde = {@(x,v)                  x-v;
+               @(x_dot,v_dot)          x_dot+v_dot;                 %this kind of structure is important, atleasft for the way gradient descent is implemented
+               @(x_dot_dot,v_dot_dot)  x_dot_dot+v_dot_dot};
 
 
 
@@ -92,7 +96,12 @@ jacobian_f_int_tilde_v=jacob(f_int_tilde,["v","v_dot","v_dot_dot"],1);        % 
 jacobian_g_int_tilde_x=jacob(g_int_tilde,["x","x_dot","x_dot_dot"],1);
 jacobian_g_int_tilde_v=jacob(g_int_tilde,["v","v_dot","v_dot_dot"],1);
 
-jacobian_G_ext_tilde=jacob(G_ext_tilde,["xi_dot","yi_dot"],4);
+% jacobian_G_ext_tilde=jacob(G_ext_tilde,["xi_dot","yi_dot"],8); authomation not working, switching to manual mode
+
+jacobian_G_ext_tilde={@(x,xi,y,yi) 0,@(x,xi,y,yi) 0;
+                      @(x,xi,y,yi) (x-xi)./sqrt((x-xi).^2 + (y-yi).^2), @(x,xi,y,yi) (y-yi)./sqrt((x-xi).^2 + (y-yi).^2);
+                      @(x,xi,y,yi) 0,@(x,xi,y,yi) 0};
+
 
 
 fprintf('Jacobians Ready. Elapsed Time %.2f\n',toc);
@@ -103,18 +112,18 @@ disp('Initialising...');
 
 
 
-%each of following objects returns a dictionary containing object by their literal names like "R_tilde"-->{R_tilde}
+%each of following objects returns a dictionary containing object by their literal names like "RR_tilde"-->{RR_tilde}
 action      =init_action(N,d,T);
 genprocess  =init_genprocess(o,N,d,T); 
 sense       =init_sense(N,o,L,dL,T,gamma_vecdL_y,lambda_vecdL_y);  
-genmodel    =init_genmodel(N,o,L,dL,T,gamma_vecdL_x,lambda_vecdL_x,gamma_vecdL_v,lambda_vecdL_v);
+genmodel    =init_genmodel(N,o,L,dL,T,gamma_vecdL_x,lambda_vecdL_x,gamma_vecdL_v,lambda_vecdL_v,etas);
 
 
 
-%% Change initial configuration. Alternatively change the function init_R_tilde
+%% Change initial configuration. Alternatively change the function init_RR_tilde
 
-R_tilde=get_from_dict(genprocess,"R_tilde"); %get the R_tilde from the dictionary
-mu_tilde=get_from_dict(genmodel,"mu_tilde_x"); %get the R_tilde from the dictionary
+RR_tilde=get_from_dict(genprocess,"RR_tilde"); %get the RR_tilde from the dictionary
+mu_tilde=get_from_dict(genmodel,"mu_tilde_x"); %get the RR_tilde from the dictionary
 
 
 
@@ -125,15 +134,21 @@ mu_tilde=get_from_dict(genmodel,"mu_tilde_x"); %get the R_tilde from the diction
 
 di=S/(n-1);
 for i=1:N
-    % R_tilde{1}(i,:,:)=(2*mod(i,2)-1+i) * ones(1,d,T); 
-    R_tilde{1}(i,:,1)=[-S/2 +  (mod(i-1,n))*di,-S/2 + (floor((i-1)/n))*di]; 
-    % R_tilde{2}(i,:,:)=zeros(1,d,T);    %manually change initial configurations  ||
-    % R_tilde{3}(i,:,:)=zeros(1,d,T);    %      ||
+    % RR_tilde{1}(i,:,:)=(2*mod(i,2)-1+i) * ones(1,d,T); 
+    if i == 3
+        RR_tilde{1}(i,:,1) = [1000, 1000];  % Agent 3 very far
+    elseif i == 4
+        RR_tilde{1}(i,:,1) = [-1000, -1000]; % Agent 4 very far
+    else
+        RR_tilde{1}(i,:,1) = [-S/2 + (i-1)*di, 0];  % All other agents aligned along x-axis at y=0
+    end
+    % RR_tilde{2}(i,:,:)=zeros(1,d,T);    %manually change initial configurations  ||
+    % RR_tilde{3}(i,:,:)=zeros(1,d,T);    %      ||
     % mu_tilde{1}{1}(i,:,1)=[10]; 
 
 
 end
-genprocess{"R_tilde"}=R_tilde;
+genprocess{"RR_tilde"}=RR_tilde;
 genmodel{"mu_tilde_x"}=mu_tilde;
 
 
@@ -145,33 +160,33 @@ genmodel{"mu_tilde_x"}=mu_tilde;
 
 disp('Entering Simulation...');
 for t=2:T
-    kx=(t<50)*kx;
+    kx=(t>15)*kx0;
+    ka=(t>15)*ka0;
+    kv=(t>15)*kv0;
 if mod(t,10)==0
     fprintf('\rSimulation Left: %.2f %  ', (T-t)*100/T);
 end
     
-    %each of following objects returns a dictionary containing object by their literal names like "R_tilde"-->{R_tilde}
-    action      =update_action(genprocess{"R_tilde"},action,genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},g_int_tilde,sense{"Y_ext_tilde"},jacobian_G_ext_tilde,sense{"PI_tilde_y"},ka,dt,t); %to add non internal forces.
+    %each of following objects returns a dictionary containing object by their literal names like "RR_tilde"-->{RR_tilde}
+    action      =update_action(genprocess{"RR_tilde"},action,genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},g_int_tilde,sense{"Y_ext_tilde"},jacobian_G_ext_tilde,sense{"PI_tilde_y"},ka,dt,t); %to add non internal forces.
 
-                %  update_action(genprocess{"R_tilde"},genmodel{"action"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},g_int_tilde,sense{"Y_ext_tilde"},jacobian_G_ext_tilde,PI_tilde_y,t)
-    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),...
+                %  update_action(genprocess{"RR_tilde"},genmodel{"action"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},g_int_tilde,sense{"Y_ext_tilde"},jacobian_G_ext_tilde,PI_tilde_y,t)
+    genprocess  =update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"RR_tilde"),...
                                                 action,dt,t,S);
     
     sense       =update_sense(sense{"Y_ext_tilde"},G,...
-                              genprocess{"R_tilde"},noise_params,sense{"PI_tilde_y"},...
+                              genprocess{"RR_tilde"},noise_params,sense{"PI_tilde_y"},...
                               t);  
     
     genmodel    =update_genmodel(genmodel{"vfe"},genmodel{"mu_tilde_x"},genmodel{"mu_tilde_v"},...
-                                jacobian_g_int_tilde_x,sense{"PI_tilde_y"},sense{"Y_ext_tilde"},...
-                                jacobian_G_ext_tilde,g_int_tilde,genmodel{"PI_tilde_x"},jacobian_f_int_tilde_x,f_int_tilde,...
-                                1,genmodel{"PI_tilde_v"},t,dt,kx,n_kx);
+                                jacobian_g_int_tilde_x,jacobian_g_int_tilde_v,sense{"PI_tilde_y"},sense{"Y_ext_tilde"},...
+                                g_int_tilde,genmodel{"PI_tilde_x"},jacobian_f_int_tilde_x,jacobian_f_int_tilde_v,f_int_tilde,...
+                                genmodel{"eta_tilde"},genmodel{"PI_tilde_v"},t,dt,kx,n_kx,kv);
     
 
-
-
-    % R_tilde=get_from_dict(genprocess,"R_tilde");
-    % action(:,:,t)= - R_tilde{1}(:,:,t-1) ; %To be replaced with genmodel("action")/updateaction
-    % genprocess=update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"R_tilde"),action,dt,t);
+    % RR_tilde=get_from_dict(genprocess,"RR_tilde");
+    % action(:,:,t)= - RR_tilde{1}(:,:,t-1) ; %To be replaced with genmodel("action")/updateaction
+    % genprocess=update_genprocess(get_from_dict(genprocess,"F_tilde"),F,get_from_dict(genprocess,"RR_tilde"),action,dt,t);
     % Y_ext_tilde
 end
 fprintf('Simulation Complete. Elapsed Time %.2f\n', toc);
@@ -180,14 +195,14 @@ disp('PLotting...');
 %---------------------------------------------------------------------------------------------------------------------------------------
 %% Plotting and analysing
 %---------------------------------------------------------------------------------------------------------------------------------------
-R_tilde=genprocess{"R_tilde"};
+RR_tilde=genprocess{"RR_tilde"};
 vfe=genmodel{"vfe"};
 mu=genmodel{"mu_tilde_x"};
 Y=sense{"Y_ext_tilde"};
 
 
 fig = figure('Color', 'w');
-mainTitle = sprintf('dt=%.2f, o=%d, n=%d, N=%d, d=%d, L=%d, dL=%d, T=%d', dt, o, n, N, d, L, dL, T);
+mainTitle = sprintf('mu_x, mu_v and action all update dt=%.2f, o=%d, n=%d, N=%d, d=%d, L=%d, dL=%d, T=%d', dt, o, n, N, d, L, dL, T);
 paramTitle = sprintf('n_kx=%d, kx=%.2f, kpx=%.2f, kv=%.2f, kpv=%.2f, ka=%.2f', n_kx, kx, kpx, kv, kpv, ka);
 tl = tiledlayout(5,1, 'Padding', 'compact', 'TileSpacing', 'compact');
 sg = sgtitle(tl, {mainTitle; paramTitle}, 'FontWeight', 'bold', 'FontSize', 12);
@@ -234,8 +249,8 @@ grid on;
 
 % 4th subplot: X coordinates of agent 1 and 2
 nexttile;
-plot(1:T, squeeze(R_tilde{1}(1,1,:)), 'LineWidth', 1.5, 'Color', col_agent1); hold on;
-plot(1:T, squeeze(R_tilde{1}(2,1,:)), 'LineWidth', 1.5, 'Color', col_agent2);
+plot(1:T, squeeze(RR_tilde{1}(1,1,:)), 'LineWidth', 1.5, 'Color', col_agent1); hold on;
+plot(1:T, squeeze(RR_tilde{1}(2,1,:)), 'LineWidth', 1.5, 'Color', col_agent2);
 hold off;
 title('X coordinate of agent 1 (red) and 2 (blue)', 'Color', 'k');
 xlabel('time');
@@ -246,8 +261,8 @@ grid on;
 
 % 5th subplot: X coordinates of agent 1 and 2
 nexttile;
-plot(1:T, squeeze(R_tilde{2}(1,1,:)), 'LineWidth', 1.5, 'Color', col_agent1); hold on;
-plot(1:T, squeeze(R_tilde{2}(2,1,:)), 'LineWidth', 1.5, 'Color', col_agent2);
+plot(1:T, squeeze(RR_tilde{2}(1,1,:)), 'LineWidth', 1.5, 'Color', col_agent1); hold on;
+plot(1:T, squeeze(RR_tilde{2}(2,1,:)), 'LineWidth', 1.5, 'Color', col_agent2);
 hold off;
 title('Velocity coordinate of agent 1 (red) and 2 (blue)', 'Color', 'k');
 xlabel('time');
@@ -277,14 +292,17 @@ open(outputVideo);
 
 blankfig = figure('Color', 'w');
 fig = figure('Color','w'); % black background for visual clarity
-% S=max(squeeze(R_tilde{1}(1,1,:)));
+% S=max(squeeze(RR_tilde{1}(1,1,:)));
 
 for t = 1:T-10
     clf
 
     % Plot agent 1 (red) and agent 2 (blue) with specified diameter
-    scatter(R_tilde{1}(1,1,t), R_tilde{1}(1,2,t), dia, col_agent1, 'filled'); hold on;
-    scatter(R_tilde{1}(2,1,t), R_tilde{1}(2,2,t), dia, col_agent2, 'filled'); hold off;
+    scatter(RR_tilde{1}(1,1,t), RR_tilde{1}(1,2,t), dia, col_agent1, 'filled'); hold on;
+    scatter(RR_tilde{1}(2,1,t), RR_tilde{1}(2,2,t), dia, col_agent2, 'filled');
+    % scatter(RR_tilde{1}(3,1,t), RR_tilde{1}(2,2,t), dia, 'w', 'filled');
+    % scatter(RR_tilde{1}(4,1,t), RR_tilde{1}(2,2,t), dia, 'w', 'filled'); 
+    hold off;
 
     ylabel("Y");
     xlim([-S S]);
@@ -307,7 +325,7 @@ end
 
 
 
-ret=R_tilde;
+ret=RR_tilde;
 
 
 
@@ -316,7 +334,7 @@ ret=R_tilde;
 
 
 
-% update_genprocess(F_tilde,F,R_tilde,action,dt,t)
+% update_genprocess(F_tilde,F,RR_tilde,action,dt,t)
 
 
 

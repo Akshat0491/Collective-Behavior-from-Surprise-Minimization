@@ -11,8 +11,8 @@ function ret=jacob(vector_function,vector,nargsss)
             if nargin(func)==0
                 if nargsss==1
                 func1=@(a) func();
-                elseif nargsss==4
-                    func1=@(a,b,c,d) func();
+                elseif nargsss==8
+                    func1=@(x,xi,y,yi,x_dot,xi_dot,y_got,yi_dot) func();
                 end
             % elseif nargin(func)==1
             %     func1=@(a,b) func(a);
