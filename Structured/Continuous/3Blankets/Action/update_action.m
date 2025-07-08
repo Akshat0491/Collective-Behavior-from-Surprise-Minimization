@@ -53,6 +53,7 @@ function ret=update_action(RR_tilde,action,mu_tilde_x,mu_tilde_v,g_int_tilde,Y_e
     
         for d=1:size(action,2)
         action(i,d,t)=(i==1).*(ka)*1*sum(acti{d},1).*1e0;
+        % action(i,d,t)=(ka)*1*sum(acti{d},1).*1e0;
         end
     end
 
@@ -61,8 +62,8 @@ function ret=update_action(RR_tilde,action,mu_tilde_x,mu_tilde_v,g_int_tilde,Y_e
     dist_y_21 = RR_tilde{1}(2,2,t-1)-RR_tilde{1}(1,2,t-1)+eps;
     dist=sqrt(dist_x_21.^2 + dist_y_21.^2);
 
-    % action(1,1,t)=action(1,1,t)+0*randn(1,1)+ (1-RR_tilde{2}(1,1,t-1)) + (dist<5) .* (dist_x_21*-10) ./ norm(dist_x_21)^3;  %agent 1 prefers the velocity of 1 i_cap
-    % % % % action(1,:,t)= - RR_tilde{1}(1,:,t-1);
+    action(1,1,t)=action(1,1,t)+0*randn(1,1) + (dist<5) .* (dist_x_21*-1e0) ./ norm(dist_x_21)^3; % (1-RR_tilde{2}(1,1,t-1))%agent 1 prefers the velocity of 1 i_cap
+    % % % action(1,:,t)= - RR_tilde{1}(1,:,t-1);
     % action(1,2,t)=action(1,2,t)+0*randn(1,1)+ (0-RR_tilde{2}(2,1,t-1)) + (dist<5) .* (dist_y_21*10) ./ norm(dist)^3; %agent 2 prefers the velocity of -1 i_cap
 
 

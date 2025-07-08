@@ -1,7 +1,8 @@
 % function ret=test_genprocess
 %testing a spring maxx system
-% close all;
-% clear all;
+clc;
+close all;
+clear all;
 
 %---------------------------------------------------------------------------------------------------------------------------------------
 %% parameters
@@ -13,20 +14,20 @@ N=2; %Number of agents
 d=2; %One dimensional world 
 L=N; %number of distinct infos agent holds
 dL=1; %dimensions of the dintinct info, never change is for now, doesn't work for dl>1
-T=100;
+T=200;
 % Rescale agent diameter to fit nicely in a 2x2 square
 S = 1; % Side length of the square (from -S to S)
 dia = 1 * (2*S) * 72; % 10% of the square's width, scaled for scatter marker size
-wanna_save=0;
+wanna_save=1;
 S=10;
 
 %learning parameters
-n_kx =5;
-kx0  =0.05;
+n_kx =5*0;
+kx0  =0.05*0;
 kpx =0.01*0;
-kv0  =0.01; %learnign rates. 
+kv0  =0.2*1; %learnign rates. 
 kpv =0.01*0;
-ka0  =0.01*1;
+ka0  =0.1*1;
 
 gamma_vecdL_y=ones(1,dL);
 gamma_vecdL_x=1*ones(1,dL); %can have it differrent
@@ -42,7 +43,8 @@ etas=[0,10,0]; %ox1 vector
 
 % F=@(A,B) B;
 F = @(RR_tilde, action) action;  % F = -x(t), i.e. Hookean force
-G = @(A,i) sqrt(sum((A - A(i,:)).^2, 2)); %returns euclidean distance 
+G = @(A,i) sqrt(sum((A - A(i,:)).^2, 2)); %returns euclidean distance between each agent and the ith agent.
+
 
 
 
@@ -68,12 +70,12 @@ G_ext_tilde={@(x,xi,y,yi,x_dot,xi_dot,y_dot,yi_dot) sqrt(eps + (x-xi).^2 + (y-yi
 
 
 
-f_int_tilde = {@(x,v)                  x+v;...            %for now, no coupling of x and v is allowed. v should not appear in delf/delx. for example, x*v^2 not lalowed, atleast for current implementation
+f_int_tilde = {@(x,v)                  x-v;...            %for now, no coupling of x and v is allowed. v should not appear in delf/delx. for example, x*v^2 not lalowed, atleast for current implementation
                @(x_dot,v_dot)          x_dot+v_dot;...                 %this kind of structure is important, atleasft for the way gradient descent is implemented
                @(x_dot_dot,v_dot_dot)  x_dot_dot+v_dot_dot};            % for now, working only with f^[i] is a function only of ith derivatives of x and v.
 
 g_int_tilde = {@(x,v)                  x-v;
-               @(x_dot,v_dot)          x_dot+v_dot;                 %this kind of structure is important, atleasft for the way gradient descent is implemented
+               @(x_dot,v_dot)          -x_dot+v_dot;                 %this kind of structure is important, atleasft for the way gradient descent is implemented
                @(x_dot_dot,v_dot_dot)  x_dot_dot+v_dot_dot};
 
 
@@ -98,9 +100,14 @@ jacobian_g_int_tilde_v=jacob(g_int_tilde,["v","v_dot","v_dot_dot"],1);
 
 % jacobian_G_ext_tilde=jacob(G_ext_tilde,["xi_dot","yi_dot"],8); authomation not working, switching to manual mode
 
-jacobian_G_ext_tilde={@(x,xi,y,yi) 0,@(x,xi,y,yi) 0;
-                      @(x,xi,y,yi) (x-xi)./sqrt((x-xi).^2 + (y-yi).^2), @(x,xi,y,yi) (y-yi)./sqrt((x-xi).^2 + (y-yi).^2);
-                      @(x,xi,y,yi) 0,@(x,xi,y,yi) 0};
+% jacobian_G_ext_tilde={@(x,xi,y,yi) -(x-xi)./sqrt((eps+x-xi).^2 + (eps+y-yi).^2), @(x,xi,y,yi) -(y-yi)./sqrt((eps+x-xi).^2 + (eps+y-yi).^2);
+%                       @(x,xi,y,yi) 0,@(x,xi,y,yi) 0;
+%                       @(x,xi,y,yi) 0,@(x,xi,y,yi) 0}
+
+jacobian_G_ext_tilde={,;
+                      ,;
+                      ,}
+                      
 
 
 
@@ -148,6 +155,7 @@ for i=1:N
 
 
 end
+S=100;
 genprocess{"RR_tilde"}=RR_tilde;
 genmodel{"mu_tilde_x"}=mu_tilde;
 
@@ -195,6 +203,7 @@ disp('PLotting...');
 %---------------------------------------------------------------------------------------------------------------------------------------
 %% Plotting and analysing
 %---------------------------------------------------------------------------------------------------------------------------------------
+
 RR_tilde=genprocess{"RR_tilde"};
 vfe=genmodel{"vfe"};
 mu=genmodel{"mu_tilde_x"};
