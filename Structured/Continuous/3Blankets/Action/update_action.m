@@ -50,9 +50,13 @@ function ret=update_action(RR_tilde,action,mu_tilde_x,mu_tilde_v,g_int_tilde,Y_e
     jacobi_Gext=make_jacobi_matrix_action(i,t,o,L,jacobian_G_ext_tilde,Y,RR_tilde);
 
     acti=jacobi_dot_PI_b(jacobi_Gext,PI_tilde_y,e_tilde_y);
+    fprintf('Acti d=1: %.5f, d=2: %.5f\n', sum(acti{1}), sum(acti{2}));
+
     
         for d=1:size(action,2)
-        action(i,d,t)=(i==1).*(ka)*1*sum(acti{d},1).*1e0;
+        action(i,d,t)=(i==1).*(-ka)*1*sum(acti{d},1).*1e0;
+        % action(1,d,t) = (i==1).*(action(1,d,t-1) - ka * sum(acti{d}));
+
         % action(i,d,t)=(ka)*1*sum(acti{d},1).*1e0;
         end
     end
@@ -62,9 +66,9 @@ function ret=update_action(RR_tilde,action,mu_tilde_x,mu_tilde_v,g_int_tilde,Y_e
     dist_y_21 = RR_tilde{1}(2,2,t-1)-RR_tilde{1}(1,2,t-1)+eps;
     dist=sqrt(dist_x_21.^2 + dist_y_21.^2);
 
-    action(1,1,t)=action(1,1,t)+0*randn(1,1) + (dist<5) .* (dist_x_21*-1e0) ./ norm(dist_x_21)^3; % (1-RR_tilde{2}(1,1,t-1))%agent 1 prefers the velocity of 1 i_cap
-    % % % action(1,:,t)= - RR_tilde{1}(1,:,t-1);
-    % action(1,2,t)=action(1,2,t)+0*randn(1,1)+ (0-RR_tilde{2}(2,1,t-1)) + (dist<5) .* (dist_y_21*10) ./ norm(dist)^3; %agent 2 prefers the velocity of -1 i_cap
+    % action(1,1,t)=action(1,1,t)+0*randn(1,1) + (t>10000).*(1-RR_tilde{2}(1,1,t-1)) + (dist<5) .* (dist_x_21*-1e0) ./ norm(dist)^3; % (1-RR_tilde{2}(1,1,t-1))%agent 1 prefers the velocity of 1 i_cap
+    % % % % action(1,:,t)= - RR_tilde{1}(1,:,t-1);
+    % action(1,2,t)=action(1,2,t)+0*randn(1,1)+ (t>10000).*(1-RR_tilde{2}(2,1,t-1)) + (dist<5) .* (dist_y_21*-1e0) ./ norm(dist)^3; %agent 2 prefers the velocity of -1 i_cap
 
 
 ret=action;
@@ -88,10 +92,12 @@ function ret=make_jacobi_matrix_action(i,t,o,L,jacobian_func_int_tilde,vals,RR_t
         jacobi_mat=cell(sz);    %each cell shal get Lx1 thing
         for m=1:sz(1)
             for n=1:sz(2)
-                if isscalar(jacobian_func_int_tilde{m,n}(RR_tilde{m}(:,1,t-1)+eps,RR_tilde{m}(i,1,t-1),eps+RR_tilde{m}(:,2,t-1),RR_tilde{m}(i,2,t-1))')
-                    jacobi_mat{m,n}=jacobian_func_int_tilde{m,n}(RR_tilde{m}(:,1,t-1)+eps,RR_tilde{m}(i,1,t-1),eps+RR_tilde{m}(:,2,t-1),RR_tilde{m}(i,2,t-1))*ones(1,L)';
+                % m,n
+                tempp=jacobian_func_int_tilde{m,n}(RR_tilde{m}(:,1,t-1)+eps,RR_tilde{m}(i,1,t-1));
+                if isscalar(tempp)
+                    jacobi_mat{m,n}=tempp*ones(1,L)';
                 else
-        jacobi_mat{m,n}=jacobian_func_int_tilde{m,n}(RR_tilde{m}(:,1,t-1)+eps,RR_tilde{m}(i,1,t-1),eps+RR_tilde{m}(:,2,t-1),RR_tilde{m}(i,2,t-1));
+        jacobi_mat{m,n}=tempp;
                 end
             end
         end

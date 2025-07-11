@@ -53,12 +53,13 @@ function ret=update_genmodel(vfe,mu_tilde_x,mu_tilde_v,jacobian_g_int_tilde_x,ja
             mu_tilde_v{i}{k}(:,:,t)=curr_mu_tilde_v{i}{k}(:,:) + kv .* (D_curr_mu_tilde_v{k}(:,:) + ( grad_term_v_1{k}(:,:) - grad_term_v_2{k}(:,:) + grad_term_v_3{k}(:,:) ));
         end
 
-        vfe_it= 0.5*(  a_dot_PI_b(e_tilde_x,PI_tilde_x,e_tilde_x)+...
-                       a_dot_PI_b(e_tilde_y,PI_tilde_y,e_tilde_y)+... 
-                       a_dot_PI_b(e_tilde_v,PI_tilde_v,e_tilde_v));
-        vfe(i,t)=sum(vfe_it,2);
+        vfe_it= 0.5*(a_dot_PI_b(e_tilde_x,PI_tilde_x,e_tilde_x)+... 
+                     a_dot_PI_b(e_tilde_y,PI_tilde_y,e_tilde_y)+...
+                     a_dot_PI_b(e_tilde_v,PI_tilde_v,e_tilde_v));
+        vfe(i,t)=vfe_it;
 
     end
+    %x around 10, y around 15
 
     vars = ["mu_tilde_x", "PI_tilde_x", "mu_tilde_v", "PI_tilde_v","eta_tilde","vfe"];
     vals = [{mu_tilde_x}, {PI_tilde_x}, {mu_tilde_v}, {PI_tilde_v},{eta_tilde},{vfe}];

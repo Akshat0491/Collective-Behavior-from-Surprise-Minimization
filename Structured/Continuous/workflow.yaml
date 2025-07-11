@@ -1,0 +1,25 @@
+Init Stage
+│
+├── init_action, init_genprocess, init_sense, init_genmodel
+│        ↓
+│        Data structures: action, RR_tilde, Y_ext_tilde, mu_tilde_x, ...
+│
+├── Precompute Jacobians: ∂f/∂x, ∂f/∂v, ∂g/∂x, ∂g/∂v, ∂g_ext/∂a
+│
+↓
+Main Loop (t = 2:T)
+│
+├── update_action         ← 🔴 focus
+│       ├─ ∇F = Jᵀ Π ε_y
+│       ├─ uses ∂g_ext/∂a, PI_y, e_y
+│       └─ adds interaction-based force
+│
+├── update_genprocess     (RR_tilde ← F_tilde + dt updates)
+│       └─ update_F_tilde (jerk dynamics)
+│
+├── update_sense          (Y_ext_tilde ← G(RR_tilde))
+│
+├── update_genmodel       (belief updates μ_x, μ_v ← VFE minimization)
+│
+↓
+Plotting + Analysis
