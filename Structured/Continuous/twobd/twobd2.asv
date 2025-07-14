@@ -1,217 +1,112 @@
-clc
+% Two-body Active Inference Simulation (Both Agents Enabled)
+
+clc;
 close all;
 T=1500;
 dt=0.1;
 to_mu=5;
 to_act=10;
-k_mu=0.1*1;
-k_a=0.1*1;
+k_mu=0.1;
+k_a=0.1;
 N=2;
 L=1;
 alpha=1;
 wanna_save=1;
+actinf2=0;
+velnormed=0;
 
-x1=zeros(1,T);
-x2=zeros(1,T);
+x1=zeros(1,T); x2=zeros(1,T);
+z1=zeros(1,T); z2=zeros(1,T);
+v1=zeros(1,T); v2=zeros(1,T);
+zv1=zeros(1,T); zv2=zeros(1,T);
+a1=zeros(1,T); a2=zeros(1,T);
+za1=zeros(1,T); za2=zeros(1,T);
+mu_x1=zeros(1,T); mu_x2=zeros(1,T);
+mu_v1=zeros(1,T); mu_v2=zeros(1,T);
+mu_a1=zeros(1,T); mu_a2=zeros(1,T);
+y_x1=zeros(1,T); y_x2=zeros(1,T);
+y_v1=zeros(1,T); y_v2=zeros(1,T);
+grad_mu1=zeros(3,T); grad_mu2=zeros(3,T);
+grad_v1=zeros(1,T); grad_zv1=zeros(1,T);
+grad_v2=zeros(1,T); grad_zv2=zeros(1,T);
+f1=zeros(1,T); f2=zeros(1,T);
 
-z1=zeros(1,T);
-z2=zeros(1,T);
-
-
-v1=zeros(1,T);
-v2=zeros(1,T);
-
-zv1=zeros(1,T);
-zv2=zeros(1,T);
-
-
-a1=zeros(1,T);
-a2=zeros(1,T);
-
-za1=zeros(1,T);
-za2=zeros(1,T);
-
-
-mu_x1=zeros(1,T);
-mu_x2=zeros(1,T);
-
-
-
-mu_v1=zeros(1,T);
-mu_v2=zeros(1,T);
-
-
-
-mu_a1=zeros(1,T);
-mu_a2=zeros(1,T);
-
-
-y_x1=zeros(1,T);
-y_x2=zeros(1,T);
-
-
-
-y_v1=zeros(1,T);
-y_v2=zeros(1,T);
-
-
-
-grad_mu1=zeros(3,T);
-grad_v1=zeros(1,T);
-grad_zv1=zeros(1,T);
-
-grad_mu2=zeros(3,T);
-grad_v2=zeros(2,T);
-
-
-
-f1=zeros(1,T);
-f2=zeros(1,T);
-
-fe=zeros(N,T);
-
-
-PI_x=init_PI_tilde(3,L,[1],[1]);
-PI_y=init_PI_tilde(2,L,[1],[1]);
-
+PI_x=init_PI_tilde(3,L,[0.5],[1]);
+PI_y=init_PI_tilde(2,L,[0.5],[1]);
 eta_x=5;
-eta=[5,0,0];
 
-%at t=1
-x1(1)=5;
-x2(1)=5;        %putting them on x axis, 10 units apart
+x1(1)=-5; x2(1)=5;
+z1(1)=0; z2(1)=0;
+v2(1)=0; v1(1)=0;
+zv2(1)=0;zv1(1)=1;
+mu_x1(1)=eta_x; mu_x2(1)=eta_x;
 
-z1(1)=3;
-z2(1)=-3;
+ey_tilde_1=zeros(2,1,T); ex_tilde_1=zeros(3,1,T);
 
-
-v2(1)=0;
-
-mu_x1(1)=eta_x;
-mu_x2(1)=eta_x;
-
-
-
-y_x1(1)=sqrt(((x2(1)-x1(1)).^2)+((z2(1)-z1(1)).^2));
-y_x2(2)=sqrt(((x2(1)-x1(1)).^2)+((z2(1)-z1(1)).^2));
-
-
-ey_tilde_1=zeros(2,1,T);
-ex_tilde_1=zeros(3,1,T);
-
-ey_tilde_2=zeros(2,1,T);
-ex_tilde_2=zeros(3,1,T);
-
+ey_tilde_2=zeros(2,1,T); ex_tilde_2=zeros(3,1,T);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Got gradients from symbolic math %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 grad_mu=@(a,eta,ma,mv,mx,yv,yx)[mx.*2.0-yx.*2.0+a.*(mv.*(3.0./2.0)+a.*ma-a.*(eta-mx).*(3.0./2.0))+a.^2.*ma+a.*(mv-a.*(eta-mx)).*(3.0./2.0);mv.*7.0-yv.*4.0+a.*(ma.*2.0+a.*mv.*2.0)+a.*ma.*2.0-a.*(eta-mx).*3.0+a.*(ma+a.*mv).*2.0;ma.*4.0+a.*(mv+a.*ma.*2.0-a.*(eta-mx))+a.*mv.*4.0+a.^2.*ma.*2.0+a.*(mv-a.*(eta-mx))];
 % grad_Act=@(mv,v1,v2)mv.*4.0+v1.*4.0-v2.*4.0;
 grad_Act=@(mv,v1,v2,x1,x2,z1,z2,zv1,zv2)[-(mv.*2.0-1.0./sqrt((x1-x2).^2+(z1-z2).^2).*((v1-v2).*(x1-x2)+(z1-z2).*(zv1-zv2)).*2.0).*1.0./sqrt((x1-x2).^2+(z1-z2).^2).*(x1-x2)-1.0./sqrt((x1-x2).^2+(z1-z2).^2).*(x1-x2).*(mv-1.0./sqrt((x1-x2).^2+(z1-z2).^2).*((v1-v2).*(x1-x2)+(z1-z2).*(zv1-zv2))).*2.0;-(mv.*2.0-1.0./sqrt((x1-x2).^2+(z1-z2).^2).*((v1-v2).*(x1-x2)+(z1-z2).*(zv1-zv2)).*2.0).*1.0./sqrt((x1-x2).^2+(z1-z2).^2).*(z1-z2)-1.0./sqrt((x1-x2).^2+(z1-z2).^2).*(z1-z2).*(mv-1.0./sqrt((x1-x2).^2+(z1-z2).^2).*((v1-v2).*(x1-x2)+(z1-z2).*(zv1-zv2))).*2.0]
 %rest things remain 0
 
-% f=@(alpha,mu_x,eta_x) -alpha*(mu_x-eta_x);
-
 for t=2:T
-    v1(t)=v1(t-1) + (dt*a1(t-1));
-    v2(t)=v2(t-1) + (dt*a2(t-1));
+    % Dynamics update
+    v1(t)=v1(t-1) + dt*a1(t-1); v2(t)=v2(t-1) + dt*a2(t-1);
+    zv1(t)=zv1(t-1) + dt*actinf2*za1(t-1); zv2(t)=zv2(t-1) + dt*za2(t-1);
 
-    zv1(t)=zv1(t-1) + (dt*za1(t-1));
-    zv2(t)=zv2(t-1) + (dt*za2(t-1));
+    x1(t)=x1(t-1) + dt*v1(t)/(sqrt(eps+velnormed*(v1(t).^2 + zv1(t)^2))); x2(t)=x2(t-1) + dt*actinf2*v2(t)/(sqrt(eps+velnormed*(v2(t).^2 + zv2(t)^2)));
+    z1(t)=z1(t-1) + dt*zv1(t)/(sqrt(eps+velnormed*(v1(t).^2 + zv1(t)^2))); z2(t)=z2(t-1) + dt*actinf2*zv2(t)/(sqrt(v2(t).^2 + zv2(t)^2));
 
-    x1(t)=x1(t-1) +  (dt*v1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    x2(t)=x2(t-1) +  (dt*v2(t)./sqrt(eps+ v2(t).^2 +zv2(t).^2));
+    % Sensory inputs
+    dist = sqrt((x2(t)-x1(t))^2 + (z2(t)-z1(t))^2);
+    dotprod = (x1(t)-x2(t))*(v1(t)-v2(t)) + (z1(t)-z2(t))*(zv1(t)-zv2(t));
+    y_x1(t)=dist; y_x2(t)=dist;
+    y_v1(t)=dotprod / dist; y_v2(t)=y_v1(t);
 
+    % Prediction errors
+    ey_tilde_1(:,:,t) = [y_x1(t) - mu_x1(t-1); y_v1(t) - mu_v1(t-1)];
+    ex_tilde_1(:,:,t) = [mu_v1(t-1) + alpha*(mu_x1(t-1)-eta_x);
+                         mu_a1(t-1) + alpha*(mu_v1(t-1));
+                         alpha*mu_a1(t-1)];
 
-    z1(t)=z1(t-1) + (dt*zv1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    z2(t)=z2(t-1) + (dt*zv2(t)./sqrt(eps+ v2(t).^2 +zv2(t).^2));
+    ey_tilde_2(:,:,t) = [y_x2(t) - mu_x2(t-1); y_v2(t) - mu_v2(t-1)];
+    ex_tilde_2(:,:,t) = [mu_v2(t-1) + alpha*(mu_x2(t-1)-eta_x);
+                         mu_a2(t-1) + alpha*(mu_v2(t-1));
+                         alpha*mu_a2(t-1)];
 
-% d = x1(t) - x2(t);
-% y_x1(t) = abs(d);
-% y_v1(t) = sign(d) * (v1(t) - v2(t));
-% 
-% 
-% y_x2(t) = abs(d);
-% y_v2(t) = sign(d) * (v2(t) - v1(t));
+    % Free energy
+    f1(t)=ey_tilde_1(:,:,t)'*PI_y*ey_tilde_1(:,:,t) + ex_tilde_1(:,:,t)'*PI_x*ex_tilde_1(:,:,t);
+    f2(t)=ey_tilde_2(:,:,t)'*PI_y*ey_tilde_2(:,:,t) + ex_tilde_2(:,:,t)'*PI_x*ex_tilde_2(:,:,t);
 
-y_x1(t)=sqrt(((x2(t)-x1(t)).^2)+((z2(t)-z1(t)).^2));
-y_x2(t)=sqrt(((x2(t)-x1(t)).^2)+((z2(t)-z1(t)).^2));
-
-y_v1(t)=(((x1(t)-x2(t))*(v1(t)-v2(t)))+((z1(t)-z2(t))*(zv1(t)-zv2(t))))./y_x1(t);
-y_v2(t)=y_v1(t);
-
-    % for i=1:N
-    % for j=1:L
-    %     sense_dist(i,j,1,1)    = sqrt((pos(j,1,1)-pos(i,1,1)).^2 +(pos(j,2,1)-pos(i,2,1)).^2 );
-    %     sense_dist_dot(i,j,1,1)= (((pos(j,1,1)-pos(i,1,1))*(vel(j,1,1)-vel(i,1,1)))+((pos(j,2,1)-pos(i,2,1))*(vel(j,2,1)-vel(i,2,1))))./sense_dist(i,j,1,1);
-    % end
-    % end
-
-
-    ey_tilde_1(:,:,t)=[y_x1(t) - mu_x1(t-1); 
-                       y_v1(t) - mu_v1(t-1)];
-
-
-
-    ex_tilde_1(:,:,t)=[mu_v1(t-1) - (-alpha*(mu_x1(t-1)-eta_x));
-                       mu_a1(t-1) - (-alpha*(mu_v1(t-1)-0));
-                          0       - (-alpha*(mu_a1(t-1)-0))];
-
-    f1(t)= dot(ey_tilde_1(:,:,t),PI_y*ey_tilde_1(:,:,t)) + dot(ex_tilde_1(:,:,t),PI_x*ex_tilde_1(:,:,t));
-    
-
-
-
-    ey_tilde_2(:,:,t)=[y_x2(t) - mu_x2(t-1); 
-                       y_v2(t) - mu_v2(t-1)];
-
-
-    ex_tilde_2(:,:,t)=[mu_v2(t-1) - (-alpha*(mu_x2(t-1)-eta_x));
-                       mu_a2(t-1) - (-alpha*(mu_v2(t-1)-0));
-                            0     - (-alpha*(mu_a2(t-1)-0))];
-    
-    f2(t)= dot(ey_tilde_2(:,:,t),PI_y*ey_tilde_2(:,:,t)) + dot(ex_tilde_2(:,:,t),PI_x*ex_tilde_2(:,:,t));
-
-
-
+    % Gradients
     grad_mu1(:,t)=grad_mu(alpha,eta_x,mu_a1(t-1),mu_v1(t-1),mu_x1(t-1),y_v1(t),y_x1(t));
     grad_mu2(:,t)=grad_mu(alpha,eta_x,mu_a2(t-1),mu_v2(t-1),mu_x2(t-1),y_v2(t),y_x2(t));
-    
-    
 
-    % mu_x1(t)=mu_x1(t-1) + dt * (mu_v1(t-1)-k_mu*grad(1));
-    % mu_v1(t)=mu_v1(t-1) + dt * (mu_a1(t-1)-k_mu*grad(2));
-    % mu_a1(t)=mu_a1(t-1) + dt * (0         -k_mu*grad(3));
+    if t > to_mu
+        mu_x1(t)=mu_x1(t-1)+k_mu*(mu_v1(t-1)-grad_mu1(1,t));
+        mu_v1(t)=mu_v1(t-1)+k_mu*(mu_a1(t-1)-grad_mu1(2,t));
+        mu_a1(t)=mu_a1(t-1)+k_mu*(0-grad_mu1(3,t));
 
-    mu_x1(t)=(t>to_mu).* (mu_x1(t-1) + k_mu * (mu_v1(t-1)-grad_mu1(1,t)));
-    mu_v1(t)=(t>to_mu).* (mu_v1(t-1) + k_mu * (mu_a1(t-1)-grad_mu1(2,t)));
-    mu_a1(t)=(t>to_mu).* (mu_a1(t-1) + k_mu * (0         -grad_mu1(3,t)));
+        mu_x2(t)=mu_x2(t-1)+k_mu*(mu_v2(t-1)-grad_mu2(1,t));
+        mu_v2(t)=mu_v2(t-1)+k_mu*(mu_a2(t-1)-grad_mu2(2,t));
+        mu_a2(t)=mu_a2(t-1)+k_mu*(0-grad_mu2(3,t));
+    else
+        mu_x1(t)=mu_x1(t-1); mu_v1(t)=mu_v1(t-1); mu_a1(t)=mu_a1(t-1);
+        mu_x2(t)=mu_x2(t-1); mu_v2(t)=mu_v2(t-1); mu_a2(t)=mu_a2(t-1);
+    end
 
-    gradact=grad_Act(mu_v1(t),v1(t),v2(t),x1(t),x2(t),z1(t),z2(t),zv1(t),zv2(t));
-    grad_v1(t) =gradact(1);
-    grad_zv1(t)=gradact(2);
-    
-    a1(t)=-(t>to_act).* (k_a*grad_v1(t));
-    za1(t)=-(t>to_act).* (k_a*grad_zv1(t));
+    grad1 = grad_Act(mu_v1(t),v1(t),v2(t),x1(t),x2(t),z1(t),z2(t),zv1(t),zv2(t));
+    grad2 = grad_Act(mu_v2(t),v2(t),v1(t),x2(t),x1(t),z2(t),z1(t),zv2(t),zv1(t));
 
+    grad_v1(t) = grad1(1); grad_zv1(t) = grad1(2);
+    grad_v2(t) = grad2(1); grad_zv2(t) = grad2(2);
 
-    % 
-    % mu_x2(t)=(t>to_mu).* (mu_x2(t-1) + k_mu * (mu_v2(t-1)-grad_mu2(1,t)));
-    % mu_v2(t)=(t>to_mu).* (mu_v2(t-1) + k_mu * (mu_a2(t-1)-grad_mu2(2,t)));
-    % mu_a2(t)=(t>to_mu).* (mu_a2(t-1) + k_mu * (0         -grad_mu2(3,t)));
-    % 
-    % grad_v2(t)=grad_Act(mu_v2(t-1),v2(t),v1(t));
-    % 
-    % a2(t)=(t>to_act).* (k_a*grad_v2(t));
-
-
-    % a2(t)=a2(t-1)+
-
-
-    
-    
-
+    a1(t) = (t > to_act)*(-k_a*grad_v1(t));
+    za1(t) = (t > to_act)*(-k_a*grad_zv1(t));
+    a2(t) = (t > to_act)*(-k_a*grad_v2(t))*actinf2;
+    za2(t) = (t > to_act)*(-k_a*grad_zv2(t))*actinf2;
 end
-
-
 
 
 
@@ -273,8 +168,8 @@ grid on;
 
 % === 5. Action gradient (acceleration proxy) ===
 subplot(3,2,5)
-scatter(time, grad_v2, 15, col1, 'filled'); hold on;
-% scatter(time, grad_v2, 15, col2, 'filled'); % Uncomment for Agent 2
+plot(time, grad_v1, 'color',col1); hold on;
+plot(time, grad_zv1,'color',col2); % Uncomment for Agent 2
 title('Action Gradient (acceleration)');
 xlabel('Time (s)'); ylabel('d(a)/dt \approx \epsilon^x_2');
 legend('Agent 1');
@@ -339,7 +234,7 @@ for t = 1:T-10
     xlabel("X")
     ylabel("Y");
     xlim([-(S+10) (S+10)]);
-    ylim([-5 5]);
+    ylim([-(S+10) (S+10)]);
     % ylim padded; xlim padded;
 
     set(gca, 'Color', 'k'); % black background for axes
@@ -359,74 +254,13 @@ end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 function ret=init_PI_tilde(o,L,gamma_vecdL,lambda_vecdL)
-    %return a cell(1,dl), each cell containing olxol matrix. 
-
-    %gamma and lambda _vecdl are 1xdl vectors
-    dL=length(gamma_vecdL); %by default dL=1
+    dL=length(gamma_vecdL);
     PI=cell(1,dL);
-
     parfor j=1:dL
-        Spatial_term_j=inv(gamma_vecdL(j)*eye(L));
-        Temporal_term_j=spm_DEM_R(o,lambda_vecdL(j));
-        % PI{j}=kron(Spatial_term_j,Temporal_term_j);
-        PI{j}=kron(Temporal_term_j,Spatial_term_j); %kept like this intentionally, w.r.t how I just flatten out mu_tilde later
+        Spatial=inv(gamma_vecdL(j)*eye(L));
+        Temporal=spm_DEM_R(o,lambda_vecdL(j));
+        PI{j}=kron(Temporal,Spatial);
     end
-
     ret=PI{1};
 end
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

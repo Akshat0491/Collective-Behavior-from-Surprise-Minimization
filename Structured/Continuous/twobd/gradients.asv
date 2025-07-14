@@ -9,26 +9,13 @@ x2=sym("x2","real");
 x1=sym("x1","real");
 v2=sym("v2","real");
 v1=sym("v1","real");
-z1=sym("z1","real");
-z2=sym("z2","real");
-zv1=sym("zv1","real");
-zv2=sym("zv2","real");
 
-
-
-
-ey=[sqrt(((x2-x1)^2)+((z2-z1)^2))-mx; ((((x1-x2)*(v1-v2))+((z1-z2)*(zv1-zv2)))/sqrt(((x2-x1)^2)+((z2-z1)^2)))-mv]
-
-% ey=[yx-mx; yv-mv]
-
+ey=[x1-x1-mx;v2-v1-mv]
 ex=[mv-(-a*(mx-eta));ma+(a*mv); a*ma]
-
 PI_x=init_PI_tilde(3,1,[1],[1]);
-
 PI_y=init_PI_tilde(2,1,[1],[1]);
 
 F=dot(ey,PI_y*ey) + dot(ex,PI_x*ex)
-gF_v=gradient(F,[v1,zv1])
+gF_v=gradient(F,[mx,mv,ma]);
 gradfunc=matlabFunction(gF_v)
 % gF_act=
-latex(gF_v)

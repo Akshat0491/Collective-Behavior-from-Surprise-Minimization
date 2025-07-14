@@ -118,11 +118,11 @@ for t=2:T
     zv2(t)=zv2(t-1) + (dt*za2(t-1));
 
     x1(t)=x1(t-1) +  (dt*v1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    x2(t)=x2(t-1) +  (dt*v2(t)./sqrt(eps+ v2(t).^2 +zv2(t).^2));
+    x2(t)=x2(t-1) +  (dt*v2(t)./(eps+ v2(t).^2 +zv2(t).^2));
 
 
     z1(t)=z1(t-1) + (dt*zv1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    z2(t)=z2(t-1) + (dt*zv2(t)./sqrt(eps+ v2(t).^2 +zv2(t).^2));
+    z2(t)=z2(t-1) + (dt*zv2(t)./(eps+ v1(t).^2 +zv2(t).^2));
 
 % d = x1(t) - x2(t);
 % y_x1(t) = abs(d);
