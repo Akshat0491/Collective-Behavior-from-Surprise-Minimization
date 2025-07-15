@@ -10,6 +10,7 @@ N=2;
 L=1;
 alpha=1;
 wanna_save=1;
+isnormed=0;
 
 x1=zeros(1,T);
 x2=zeros(1,T);
@@ -117,12 +118,12 @@ for t=2:T
     zv1(t)=zv1(t-1) + (dt*za1(t-1));
     zv2(t)=zv2(t-1) + (dt*za2(t-1));
 
-    x1(t)=x1(t-1) +  (dt*v1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    x2(t)=x2(t-1) +  (dt*v2(t)./sqrt(eps+ v2(t).^2 +zv2(t).^2));
+    x1(t)=x1(t-1) +  (dt*v1(t)./(1-isnormed+isnormed*sqrt(eps+ v1(t).^2 +zv1(t).^2)));
+    x2(t)=x2(t-1) +  (dt*v2(t)./(1-isnormed+isnormed*sqrt(eps+ v2(t).^2 +zv2(t).^2)));
 
 
-    z1(t)=z1(t-1) + (dt*zv1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    z2(t)=z2(t-1) + (dt*zv2(t)./sqrt(eps+ v2(t).^2 +zv2(t).^2));
+    z1(t)=z1(t-1) + (dt*zv1(t)./(1-isnormed+isnormed*sqrt(eps+ v1(t).^2 +zv1(t).^2)));
+    z2(t)=z2(t-1) + (dt*zv2(t)./(1-isnormed+isnormed*sqrt(eps+ v2(t).^2 +zv2(t).^2)));
 
 % d = x1(t) - x2(t);
 % y_x1(t) = abs(d);
@@ -230,7 +231,7 @@ ls1 = '-';
 ls2 = '--';
 
 % --- Define parameter title string ---
-param_str = sprintf('dt= %.3f,\\alpha = %.3f   k_\\mu = %.3f   k_a = %.3f   \\eta = %.3f',dt, alpha, k_mu, k_a, eta_x);
+param_str = sprintf('dt= %.3f,\\alpha = %.3f   k_\\mu = %.3f   k_a = %.3f   \\eta = %.3f isnormed= %d ',dt, alpha, k_mu, k_a, eta_x,isnormed);
 
 % --- Create figure ---
 figure('Color', 'k');
@@ -319,7 +320,7 @@ col_agent1 = [0.85 0.33 0.1]; % red
 col_agent2 = [0.12 0.45 0.70]; % blue
 S=10;
 outputVideo = VideoWriter(filename,'MPEG-4');
-outputVideo.FrameRate = 35; % Adjust as needed
+outputVideo.FrameRate = 70; % Adjust as needed
 % outputVideo.FileFormat='mp4';
 open(outputVideo);
 
@@ -345,7 +346,7 @@ for t = 1:T-10
     set(gca, 'Color', 'k'); % black background for axes
     grid on;
     set(gca, 'GridColor', [1 1 1], 'GridAlpha', 0.5); % white grid lines
-    title(sprintf('t= %d, dt= %.2f, alpha= %.2f, kmu= %.2f, ka=%.2f, eta=%.2f',t,dt,alpha,k_mu,k_a,eta_x))
+    title(sprintf('t= %d, dt= %.2f, alpha= %.2f, kmu= %.2f, ka=%.2f, eta=%.2f, isnormed= %d',t,dt,alpha,k_mu,k_a,eta_x,isnormed))
     drawnow;
 
     % Capture the plot as a frame

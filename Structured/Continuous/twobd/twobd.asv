@@ -10,6 +10,7 @@ N=2;
 L=1;
 alpha=1;
 wanna_save=1;
+isnormed=0;
 
 x1=zeros(1,T);
 x2=zeros(1,T);
@@ -95,6 +96,9 @@ mu_x2(1)=eta_x;
 y_x1(1)=sqrt(((x2(1)-x1(1)).^2)+((z2(1)-z1(1)).^2));
 y_x2(2)=sqrt(((x2(1)-x1(1)).^2)+((z2(1)-z1(1)).^2));
 
+y_x1(1)=atan2d(zv1(1),v1(1));
+y_x2(2)=atan2d(zv2(1),v2(1));
+
 
 ey_tilde_1=zeros(2,1,T);
 ex_tilde_1=zeros(3,1,T);
@@ -117,12 +121,12 @@ for t=2:T
     zv1(t)=zv1(t-1) + (dt*za1(t-1));
     zv2(t)=zv2(t-1) + (dt*za2(t-1));
 
-    x1(t)=x1(t-1) +  (dt*v1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    x2(t)=x2(t-1) +  (dt*v2(t)./(eps+ v2(t).^2 +zv2(t).^2));
+    x1(t)=x1(t-1) +  (dt*v1(t)./(1-isnormed+isnormed*sqrt(eps+ v1(t).^2 +zv1(t).^2)));
+    x2(t)=x2(t-1) +  (dt*v2(t)./(1-isnormed+isnormed*sqrt(eps+ v1(t).^2 +zv1(t).^2)));
 
 
-    z1(t)=z1(t-1) + (dt*zv1(t)./sqrt(eps+ v1(t).^2 +zv1(t).^2));
-    z2(t)=z2(t-1) + (dt*zv2(t)./(eps+ v1(t).^2 +zv2(t).^2));
+    z1(t)=z1(t-1) + (dt*zv1(t)./(1-isnormed+isnormed*sqrt(eps+ v1(t).^2 +zv1(t).^2)));
+    z2(t)=z2(t-1) + (dt*zv2(t)./(1-isnormed+isnormed*sqrt(eps+ v2(t).^2 +zv2(t).^2)));
 
 % d = x1(t) - x2(t);
 % y_x1(t) = abs(d);
@@ -219,7 +223,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Aesthetic Plotting
 
 % Time vector
-time = (1:T) * dt;
+time = (1:T);
 
 % --- Define colors ---
 col1 = [0.1 0.6 0.8];   % Agent 1 color (bluish)
@@ -273,11 +277,11 @@ grid on;
 
 % === 5. Action gradient (acceleration proxy) ===
 subplot(3,2,5)
-scatter(time, grad_v2, 15, col1, 'filled'); hold on;
-% scatter(time, grad_v2, 15, col2, 'filled'); % Uncomment for Agent 2
+scatter(time, grad_v1, 15, col1, 'filled'); hold on;
+scatter(time, grad_zv1, 15, col2, 'filled'); % Uncomment for Agent 2
 title('Action Gradient (acceleration)');
 xlabel('Time (s)'); ylabel('d(a)/dt \approx \epsilon^x_2');
-legend('Agent 1');
+legend('Agent 1 x', 'Agent 2 y');
 grid on;
 
 % === 6. (Optional) Hidden prediction error: jerk ===
